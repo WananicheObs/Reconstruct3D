@@ -1,0 +1,3 @@
+#define p_NAME "@Rec3D@"
+#define p_VERSION_MAJOR "@Rec3D_VERSION_MAJOR@"
+#define p_VERSION_MINOR "@Rec3D_VERSION_MINOR@"
