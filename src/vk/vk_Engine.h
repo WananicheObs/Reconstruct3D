@@ -17,9 +17,15 @@ public:
     //init
     void init();
     void init_vulkan();
+    void init_debugMessenger();
 
     //miscellaneous
     void getVulkanInfo();
+    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    void* pUserData);
 
     //cleanup
     void cleanup();
