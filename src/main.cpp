@@ -28,7 +28,8 @@ idea:
     This will allow for adaptive analysis of the image, enabling the detection of both fine details and significant edges.
     By adjusting sensitivity levels, I can highlight different features based on the specific requirements of the application.
     This approach will improve object detection accuracy and provide flexibility for post-processing techniques
-interesting idea that pop out of my mind while talking with GPT
+
+interesting idea that pop out of my mind while talking with GPT:
     1. but doesn't his approach generate problem if a black and white check board is analyse, what do you think of that
     ...
     no, I mean like in number with is all 255 255 255 and black is 0 0 0, so if we do the distance red-blue, blue-green, green-red, the
@@ -37,5 +38,13 @@ interesting idea that pop out of my mind while talking with GPT
     (like how far it is from 0 or something like that i did not think of that yet)
     3. so if two pixel has similar normalized RGB distances, but different "a" values, we can conclude that the one with the stronger a resive
     more light, so the directions of the light is near, this will give a massive advantage I think while trying to negate the effects of white
-    light (still problem will coloured light) and will reduced the impact of black-white board 
+    light (still problem will coloured light) and will reduced the impact of black-white board
+    4. I just thought of something, since the proposed algorithm uses the normalized distance between color chanel, I can probably analyse a constant
+    shift in color as if for example we take some white that turns red, between the tree chanel (red-blue rb, blue-green bg, green-red gr), RB will
+    increase, BG will remain the same, and GR will decrease My only problem with this is that if my algorithm can do it, why not the other? react to
+    the full message, not just the end
+
+source:
+    https://royalsocietypublishing.org/doi/10.1098/rsfs.2018.0008
+    https://cocodataset.org/#explore
 */
