@@ -7,7 +7,7 @@ class vk_Engine {
 
     VkInstance _instance;// Vulkan library handle
 	VkDebugUtilsMessengerEXT _debug_messenger;// Vulkan debug output handle
-	VkPhysicalDevice _chosenGPU;// GPU chosen as the default device
+	VkPhysicalDevice _chosenGPU = VK_NULL_HANDLE;// GPU chosen as the default device
 	VkDevice _device; // Vulkan device for commands
 
     VkQueue _generalQueue;
@@ -18,6 +18,7 @@ public:
     void init();
     void init_vulkan();
     void init_debugMessenger();
+    void init_device();
 
     //miscellaneous
     void getVulkanInfo();
