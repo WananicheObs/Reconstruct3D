@@ -17,7 +17,7 @@
 #define VK_CHECK(x)                                                     \
     do {                                                                \
         VkResult err = x;                                               \
-        if (err) {                                                      \
+        if (err != VK_SUCCESS) {                                        \
             std::cout << "[ERROR] " << string_VkResult(err) << std::endl; \
             abort();                                                    \
         }                                                               \

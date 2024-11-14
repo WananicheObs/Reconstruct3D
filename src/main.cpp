@@ -1,11 +1,16 @@
 #include <iostream>
+#include "vk/manager/GPU_manager.h"
+GPU_manager vk_manager = GPU_manager();
+
 #include "vk/vk_Engine.h"
 
 int main(int argc, char* argv[]) {
     vk_Engine engine{};
-    engine.init();
-    engine.getVulkanInfo();
-    engine.cleanup();
+    
+    auto bestValueGPU = vk_manager._devices.rbegin();
+    std::cout << bestValueGPU->second._name << std::endl;
+
+    //vk_manager.~GPU_manager();
 }
 
 /*

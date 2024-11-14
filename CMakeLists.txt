@@ -15,6 +15,8 @@ file(GLOB SOURCES
     src/*.h
     src/vk/*.cpp
     src/vk/*.h
+    src/vk/manager/*.cpp
+    src/vk/manager/*.h
 )
 add_executable(${Rec3D} ${SOURCES})
 
