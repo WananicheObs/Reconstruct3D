@@ -138,7 +138,7 @@ void GPU_manager::init_PhysicalDevices() {
         value += (deviceFeatures.multiDrawIndirect) ? 100 : 0; //can be use as main
         //value += (int) dInfo.queuesFamilly.size();
 
-        if(deviceFeatures.geometryShader) _devices.emplace(value, dInfo);
+        if(deviceFeatures.geometryShader) _devices.emplace_back(dInfo);
     }
 
     
@@ -154,9 +154,9 @@ void GPU_manager::init_Devices() {
         {
             //get all QUEUES
             uint32_t queueFamilyCount = 0;
-            vkGetPhysicalDeviceQueueFamilyProperties(device.second._physicalDevice, &queueFamilyCount, nullptr);
+            vkGetPhysicalDeviceQueueFamilyProperties(device._physicalDevice, &queueFamilyCount, nullptr);
             std::vector<VkQueueFamilyProperties> tempQueueFamily{queueFamilyCount};
-            vkGetPhysicalDeviceQueueFamilyProperties(device.second._physicalDevice, &queueFamilyCount, tempQueueFamily.data());
+            vkGetPhysicalDeviceQueueFamilyProperties(device._physicalDevice, &queueFamilyCount, tempQueueFamily.data());
 
             //remove ALL queues that are not graphical, compute or transfer
             int i = 0;
@@ -198,7 +198,7 @@ void GPU_manager::init_Devices() {
             createInfo.enabledLayerCount = 0;
         }
 
-        VK_CHECK(vkCreateDevice(device.second._physicalDevice, &createInfo, nullptr, &device.second._device));
+        VK_CHECK(vkCreateDevice(device._physicalDevice, &createInfo, nullptr, &device._device));
 
         //retrieve all QUEUES
         for (auto& QFP : queueFamilies) {
@@ -209,8 +209,8 @@ void GPU_manager::init_Devices() {
 
             
             for (int i = 0; i < QFP.data.queueCount; i++) {
-                device.second.queues[index].emplace_back(QFP);
-                vkGetDeviceQueue(device.second._device, QFP.index, i, &device.second.queues[index].back().queue);
+                device.queues[index].emplace_back(QFP);
+                vkGetDeviceQueue(device._device, QFP.index, i, &device.queues[index].back().queue);
             }
         }
     }
@@ -220,7 +220,7 @@ void GPU_manager::init_Devices() {
 GPU_manager::~GPU_manager() {
 
     for (auto device : _devices) {
-        vkDestroyDevice(device.second._device, nullptr);
+        vkDestroyDevice(device._device, nullptr);
     }
 
     if (bUseValidationLayers) {
@@ -228,6 +228,35 @@ GPU_manager::~GPU_manager() {
     }
 
     vkDestroyInstance(_instance, nullptr);
+}
+
+/*** GET DEVICES INFORMATIONS ***/
+DeviceID GPU_manager::get_DeviceRanked(uint32_t rank) {
+    return 0; // :(
+}
+VkMemoryAllocateInfo GPU_manager::get_MemAllInfo(
+    DeviceID d_ID, uint32_t size, 
+    VkMemoryHeapFlags h_Flags,
+    uint32_t typeFilter, VkMemoryPropertyFlags properties
+) {
+    //get needed info
+    auto& device = _devices[d_ID];
+    VkMemoryAllocateInfo info{ .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, .allocationSize = size, .memoryTypeIndex = UINT32_MAX };
+    //find type if one valid
+    for(const auto& head : device.m_Heaps) {
+        if((head.data.flags & h_Flags) != h_Flags) continue;
+        //try find type if valid heap
+        for(int i = 0; i < head.m_type.size(); i++) { //I use a normal for loop so that I can implement a better memory management with only one vector for every type, just ordered. using this technique, I will be able to just set the start_index of the heap in this vector and then go throw the size of the head, just more optimized memory management (less vector for the same result)
+            if(typeFilter & (1 << head.m_type[i].heapIndex) && (head.m_type[i].propertyFlags & properties) == properties) { //do not forget, the heapIndex has been redefine as the type index
+                info.memoryTypeIndex = head.m_type[i].heapIndex;
+                break;
+            }
+        }
+        //if found valid type
+        if(info.memoryTypeIndex != UINT32_MAX) break;
+    }
+    //analyse result? or not since the memoryTypeIndex being really high will create problem on it's own (I hope)
+    return info;
 }
 
 

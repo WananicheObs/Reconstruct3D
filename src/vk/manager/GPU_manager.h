@@ -1,7 +1,10 @@
 #pragma once
 
 #include "vk/vk_type.h"
-#include <map>
+//#include <map>
+
+#define DeviceID const uint32_t
+
 
 struct DeviceInfo {
     //core
@@ -39,7 +42,7 @@ public:
     VkInstance _instance;// Vulkan library handle
 	VkDebugUtilsMessengerEXT _debug_messenger;// Vulkan debug output handle
 
-    std::multimap<int, DeviceInfo> _devices;
+    std::vector<DeviceInfo> _devices;
 
 //func
     /*** INIT && cleanup ***/
@@ -52,6 +55,15 @@ private:
     void init_PhysicalDevices();
     void init_Devices();
 
+
+    /*** GET DEVICES INFORMATIONS ***/
+public:
+    DeviceID get_DeviceRanked(uint32_t rank);
+    VkMemoryAllocateInfo get_MemAllInfo(
+        DeviceID d_ID, uint32_t size, 
+        VkMemoryHeapFlags h_Flags,
+        uint32_t typeFilter, VkMemoryPropertyFlags properties
+    );
 
     /*** VALIDATION LAYER ***/
 private:

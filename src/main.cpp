@@ -6,11 +6,8 @@ GPU_manager vk_manager = GPU_manager();
 
 int main(int argc, char* argv[]) {
     vk_Engine engine{};
-    
-    auto bestValueGPU = vk_manager._devices.rbegin();
-    std::cout << bestValueGPU->second._name << std::endl;
 
-    //vk_manager.~GPU_manager();
+    //vk_manager.~GPU_manager(); not needed since it is global, it automatically destroy itself
 }
 
 /*
