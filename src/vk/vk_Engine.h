@@ -7,4 +7,5 @@ class vk_Engine {
 
 public:
     vk_Engine();
+    ~vk_Engine();
 };

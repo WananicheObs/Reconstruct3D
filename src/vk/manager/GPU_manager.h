@@ -1,6 +1,8 @@
 #pragma once
 
 #include "vk/vk_type.h"
+#include "vk/manager/GPU_manager_info.h"
+
 //#include <map>
 
 #define DeviceID const uint32_t
@@ -11,10 +13,10 @@ struct DeviceInfo {
     std::string _name;
     VkPhysicalDevice _physicalDevice;
     VkDevice _device = VK_NULL_HANDLE;
-
     VkPhysicalDeviceType deviceType;
 
     //queues
+    /* this hole section will need to be replace to a single QFInfo* with 3 index to where graphics, computes and transfers QFInfo start */
     static const int GRAPHICS_QUEUES_INDEX = 0;
     static const int COMPUTE_QUEUES_INDEX = 1;
     static const int TRANSFER_QUEUES_INDEX = 2;
@@ -22,6 +24,13 @@ struct DeviceInfo {
     struct QFInfo { VkQueueFamilyProperties data; VkQueue queue; int index; };
     std::vector<QFInfo> queues[3];
 
+    /*
+    QFInfo* queues; // Pointer to a contiguous array of QFInfo
+    int graphicsQueueStart; // Index where graphics queues start
+    int computeQueueStart; // Index where compute queues start
+    int transferQueueStart; // Index where transfer queues start
+    int totalQueueCount; // Total number of queues
+    */
 
     //memory
     VkPhysicalDeviceMemoryProperties memoryProperties;
@@ -59,11 +68,7 @@ private:
     /*** GET DEVICES INFORMATIONS ***/
 public:
     DeviceID get_DeviceRanked(uint32_t rank);
-    VkMemoryAllocateInfo get_MemAllInfo(
-        DeviceID d_ID, uint32_t size, 
-        VkMemoryHeapFlags h_Flags,
-        uint32_t typeFilter, VkMemoryPropertyFlags properties
-    );
+    VkMemoryAllocateInfo get_MemoryAllocateInfo( DeviceID _deviceID, const GPUm_MemoryAllocationInfo& _memoryAllocationInfo );
 
     /*** VALIDATION LAYER ***/
 private:

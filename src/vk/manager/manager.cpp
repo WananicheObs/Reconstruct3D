@@ -234,29 +234,23 @@ GPU_manager::~GPU_manager() {
 DeviceID GPU_manager::get_DeviceRanked(uint32_t rank) {
     return 0; // :(
 }
-VkMemoryAllocateInfo GPU_manager::get_MemAllInfo(
-    DeviceID d_ID, uint32_t size, 
-    VkMemoryHeapFlags h_Flags,
-    uint32_t typeFilter, VkMemoryPropertyFlags properties
-) {
+VkMemoryAllocateInfo GPU_manager::get_MemoryAllocateInfo( DeviceID _deviceID, const GPUm_MemoryAllocationInfo& _memoryAllocationInfo ) {
     //get needed info
-    auto& device = _devices[d_ID];
-    VkMemoryAllocateInfo info{ .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, .allocationSize = size, .memoryTypeIndex = UINT32_MAX };
+    auto& device = _devices[_deviceID];
+    VkMemoryAllocateInfo info{ .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, .allocationSize = _memoryAllocationInfo.size, .memoryTypeIndex = UINT32_MAX };
     //find type if one valid
     for(const auto& head : device.m_Heaps) {
-        if((head.data.flags & h_Flags) != h_Flags) continue;
+        if((head.data.flags & _memoryAllocationInfo.heapFlags) != _memoryAllocationInfo.heapFlags) continue;
         //try find type if valid heap
         for(int i = 0; i < head.m_type.size(); i++) { //I use a normal for loop so that I can implement a better memory management with only one vector for every type, just ordered. using this technique, I will be able to just set the start_index of the heap in this vector and then go throw the size of the head, just more optimized memory management (less vector for the same result)
-            if(typeFilter & (1 << head.m_type[i].heapIndex) && (head.m_type[i].propertyFlags & properties) == properties) { //do not forget, the heapIndex has been redefine as the type index
+            if(_memoryAllocationInfo.typeFilter & (1 << head.m_type[i].heapIndex) && (head.m_type[i].propertyFlags & _memoryAllocationInfo.propertiesFlags) == _memoryAllocationInfo.propertiesFlags) { //do not forget, the heapIndex has been redefine as the type index
                 info.memoryTypeIndex = head.m_type[i].heapIndex;
-                break;
+                return info; //return quickly if valid type found
             }
         }
-        //if found valid type
-        if(info.memoryTypeIndex != UINT32_MAX) break;
     }
-    //analyse result? or not since the memoryTypeIndex being really high will create problem on it's own (I hope)
-    return info;
+    
+    throw std::runtime_error("Failed to find a suitable memory type!");
 }
 
 

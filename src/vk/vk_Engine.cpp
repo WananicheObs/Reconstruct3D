@@ -4,15 +4,18 @@
 #include "Rec3Dconfig.h"
 
 //#include "vk/vk_type.h"
-VkDevice _device;
-VkPhysicalDevice _physicalDevice;
+DeviceInfo* _deviceInfo = nullptr;
+VkDevice _device = VK_NULL_HANDLE;
 
+//image
+const uint32_t WIDTH = 1024;
+const uint32_t HEIGHT = 1024;
 
-//image test
+VkImage image = VK_NULL_HANDLE;
+VkDeviceMemory imageMemory = VK_NULL_HANDLE;
+
+/*
 void testAllocateImage() {
-    const int WIDTH = 128;
-    const int HEIGHT = 128;
-
     //image create info
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -104,13 +107,46 @@ void testAllocateBuffer() {
     // Step 5: Bind memory to buffer
     vkBindBufferMemory(_device, buffer, bufferMemory, 0);
 }
+*/
+
+void createImage() {
+    VkImageCreateInfo imageInfo = {};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D; // or VK_IMAGE_TYPE_3D, etc.
+    imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM; // Image format
+    imageInfo.extent.width = WIDTH; // Width of the image
+    imageInfo.extent.height = HEIGHT; // Height of the image
+    imageInfo.extent.depth = 1; // Depth (for 2D images, this is usually 1)
+    imageInfo.mipLevels = 1; // Number of mipmap levels
+    imageInfo.arrayLayers = 1; // Number of layers (for 3D textures, this can be > 1)
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT; // Number of samples per pixel
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL; // Tiling (optimal or linear)
+    imageInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // Usage flags
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // Sharing mode
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // Initial layout
+
+    VK_CHECK( vkCreateImage(_device, &imageInfo, nullptr, &image) );
+
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(_device, image, &memRequirements);
+    memRequirements.alignment = memRequirements.alignment;
+
+    GPUm_MemoryAllocationInfo info{ .size = memRequirements.size, .typeFilter = memRequirements.memoryTypeBits };
+    info.heapFlags  = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
+    info.propertiesFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+    VkMemoryAllocateInfo allocInfo = vk_manager.get_MemoryAllocateInfo(0, info);
+    VK_CHECK( vkAllocateMemory(_device, &allocInfo, nullptr, &imageMemory) );
+    VK_CHECK( vkBindImageMemory(_device, image, imageMemory, 0) );
+}
 
 vk_Engine::vk_Engine() {
-    auto& bestValueGPU = vk_manager._devices[vk_manager.get_DeviceRanked(0)];
-    _device = bestValueGPU._device;
-    _physicalDevice = bestValueGPU._physicalDevice;
-
-    std::cout << bestValueGPU._name << std::endl;
-
-    //testAllocateBuffer();
+    _deviceInfo = &vk_manager._devices[/*vk_manager.get_DeviceRanked(0)*/0];
+    _device = _deviceInfo->_device;
+    
+    createImage();
+}
+vk_Engine::~vk_Engine() {
+    vkDestroyImage(_device, image, nullptr);
+    vkFreeMemory(_device, imageMemory, nullptr);
 }
